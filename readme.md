@@ -1,31 +1,31 @@
-# Requisitos Funcionais para Software de Padaria Online
+## 🚀 Funcionalidades
 
-## RF01: Página Inicial Institucional
-- **Adequação:** Apresenta informações essenciais sobre a padaria de forma clara e acessível.
-- **Conformidade:** Layout responsivo que se adapta a dispositivos móveis e desktop, tempo de carregamento inferior a 3 segundos.
-- **Satisfação:** Facilita o acesso do cliente às informações, aumentando a confiança e satisfação.
+### RF01: Página Inicial Institucional
+- **Adequação:** Apresenta informações essenciais sobre a padaria de forma clara e acessível
+- **Conformidade:** Layout responsivo, tempo de carregamento < 3s
+- **Satisfação:** Facilita acesso às informações, aumentando confiança do cliente
 
-## RF02: Sobre a Organização
-- **Adequação:** Expõe a história, equipe e diferenciais, alinhando-se às expectativas dos clientes.
-- **Conformidade:** Interface consistente com padrão visual da marca, compatibilidade com navegadores principais.
-- **Satisfação:** Valoriza a identidade da padaria, promovendo maior engajamento dos clientes.
+### RF02: Sobre a Organização  
+- **Adequação:** Expõe história, equipe e diferenciais da padaria
+- **Conformidade:** Interface consistente, compatibilidade cross-browser
+- **Satisfação:** Valoriza identidade da marca, promove engajamento
 
-## RF03: Página de Serviços/Produtos
-- **Adequação:** Lista produtos com descrições, preços e imagens detalhadas.
-- **Conformidade:** Carregamento otimizado de imagens, filtros e busca com resposta em até 2 segundos.
-- **Satisfação:** Proporciona ao cliente uma escolha informada, aumentando a confiança na compra.
+### RF03: Página de Serviços/Produtos
+- **Adequação:** Lista produtos com descrições, preços e imagens detalhadas
+- **Conformidade:** Otimização de imagens, filtros com resposta < 2s
+- **Satisfação:** Permite escolha informada, aumenta confiança na compra
 
-## RF04: Sistema de Login/Admin Básico
-- **Adequação:** Permite gerenciamento eficiente de produtos e pedidos por administradores.
-- **Conformidade:** Autenticação segura.
-- **Satisfação:** Melhora a organização interna, refletindo em melhor atendimento ao cliente.
+### RF04: Sistema de Login/Admin Básico
+- **Adequação:** Gerenciamento eficiente de produtos e pedidos
+- **Conformidade:** Autenticação segura, proteção de dados
+- **Satisfação:** Melhora organização interna e atendimento
 
-## RF05: Sistema de Pedidos Online
-- **Adequação:** Permite ao cliente fazer pedidos de forma simples.
-- **Conformidade:** Formulários intuitivos, validação em tempo real.
-- **Satisfação:** Torna o processo de compra mais prático.
+### RF05: Cardápio Digital Interativo
+- **Adequação:** Produtos organizados por categoria com filtros intuitivos
+- **Conformidade:** Interface responsiva, acessibilidade WCAG 2.1
+- **Satisfação:** Navegação fácil e descoberta de produtos
 
-## RF06: Notificações de Status do Pedido
-- **Adequação:** Informa o cliente sobre o andamento do pedido.
-- **Conformidade:** Notificações em tempo real, disponibilidade 99,5%, acessibilidade WCAG 2.1.
-- **Satisfação:** Melhora a experiência do cliente.
+### RF06: Sistema de Pedidos Básico
+- **Adequação:** Formulário para encomendas com validação completa
+- **Conformidade:** Segurança de dados, integração com backend
+- **Satisfação:** Processo simplificado de pedidos
