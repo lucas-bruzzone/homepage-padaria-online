@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Padaria Online - Deploy Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .status {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #c3e6cb;
+        }
+        .info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        h1 { color: #333; }
+        .timestamp { 
+            color: #666; 
+            font-size: 0.9em; 
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🥖 Padaria Online</h1>
+        
+        <div class="status">
+            ✅ Deploy realizado com sucesso!
+        </div>
+
+        <div class="info">
+            <h3>Informações do Deploy:</h3>
+            <ul>
+                <li><strong>Projeto:</strong> homepage-padaria-online</li>
+                <li><strong>Ambiente:</strong> development</li>
+                <li><strong>Região AWS:</strong> us-east-1</li>
+                <li><strong>Infraestrutura:</strong> S3 + Terraform</li>
+            </ul>
+        </div>
+
+        <p>Este é um arquivo de validação para testar o hosting estático no S3.</p>
+        <p>O site da padaria será implementado em breve com as funcionalidades definidas nos requisitos.</p>
+
+        <div class="timestamp">
+            <script>
+                document.write('Deploy validado em: ' + new Date().toLocaleString('pt-BR'));
+            </script>
+        </div>
+    </div>
+</body>
+</html>
