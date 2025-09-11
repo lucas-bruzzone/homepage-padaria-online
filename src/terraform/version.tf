@@ -2,11 +2,12 @@ terraform {
   backend "s3" {
     # Substitua pelos outputs do bootstrap
     bucket         = "padaria-online-terraform"
-    key            = "example-aws-terraform-template/terraform.tfstate"
+    key            = "padaria-online-terraform/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "terraform-lock-state"
     encrypt        = true
   }
+  
 
   required_version = ">= 1.0"
 
