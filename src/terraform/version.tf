@@ -7,7 +7,7 @@ terraform {
     dynamodb_table = "terraform-lock-state"
     encrypt        = true
   }
-  
+
 
   required_version = ">= 1.0"
 

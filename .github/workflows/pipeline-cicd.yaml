@@ -37,10 +37,10 @@ jobs:
       
     - name: Terraform Plan
       working-directory: src/terraform
-      run: terraform plan -out=tfplan
+      run: terraform plan -var-file=tfvars/development.tfvars -out=tfplan
       
     - name: Terraform Apply (Push)
       if: github.event_name == 'push'
       working-directory: src/terraform
-      run: terraform apply -auto-approve
+      run: terraform apply -var-file=tfvars/development.tfvars -auto-approve
   
