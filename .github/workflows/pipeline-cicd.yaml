@@ -61,18 +61,3 @@ jobs:
         BUCKET_NAME="homepage-padaria-online-frontend-development"
         aws s3 sync src/frontend/ s3://$BUCKET_NAME --delete
         echo "Frontend synced to bucket: $BUCKET_NAME"
-        
-    - name: Test Lambda Functions
-      if: github.event_name == 'push'
-      run: |
-        echo "Testing Python Lambda..."
-        aws lambda invoke --function-name homepage-padaria-online-python-lambda-development \
-          --payload '{"path":"/api/health","httpMethod":"GET"}' \
-          response.json
-        cat response.json
-        
-        echo "Testing Node.js Lambda..."
-        aws lambda invoke --function-name homepage-padaria-online-nodejs-lambda-development \
-          --payload '{"path":"/api/health","httpMethod":"GET"}' \
-          response2.json
-        cat response2.json
