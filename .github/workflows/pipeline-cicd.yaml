@@ -1,4 +1,4 @@
-name: Terraform AWS Academy Deploy Test
+name: Terraform AWS Academy Deploy with Lambda
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
       - 'src/**'
 
 jobs:
-  terraform-test:
+  terraform-deploy:
     runs-on: ubuntu-latest
     
     steps:
@@ -19,6 +19,11 @@ jobs:
       with:
         terraform_version: 1.5.0
         
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -26,6 +31,12 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         aws-region: us-east-1
+        
+    - name: Build Node.js Lambda
+      run: |
+        cd src/lambda/nodejs
+        npm install --production
+        cd ../../../
         
     - name: Terraform Init
       working-directory: src/terraform
@@ -39,7 +50,7 @@ jobs:
       working-directory: src/terraform
       run: terraform plan -var-file=tfvars/development.tfvars -out=tfplan
       
-    - name: Terraform Apply (Push)
+    - name: Terraform Apply
       if: github.event_name == 'push'
       working-directory: src/terraform
       run: terraform apply -var-file=tfvars/development.tfvars -auto-approve
@@ -50,3 +61,18 @@ jobs:
         BUCKET_NAME="homepage-padaria-online-frontend-development"
         aws s3 sync src/frontend/ s3://$BUCKET_NAME --delete
         echo "Frontend synced to bucket: $BUCKET_NAME"
+        
+    - name: Test Lambda Functions
+      if: github.event_name == 'push'
+      run: |
+        echo "Testing Python Lambda..."
+        aws lambda invoke --function-name homepage-padaria-online-python-lambda-development \
+          --payload '{"path":"/api/health","httpMethod":"GET"}' \
+          response.json
+        cat response.json
+        
+        echo "Testing Node.js Lambda..."
+        aws lambda invoke --function-name homepage-padaria-online-nodejs-lambda-development \
+          --payload '{"path":"/api/health","httpMethod":"GET"}' \
+          response2.json
+        cat response2.json
