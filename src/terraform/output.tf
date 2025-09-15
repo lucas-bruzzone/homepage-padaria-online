@@ -46,7 +46,7 @@ output "nodejs_lambda_arn" {
   value       = aws_lambda_function.nodejs_lambda.arn
 }
 
-output "lambda_execution_role_arn" {
-  description = "ARN da IAM role para execução das Lambdas"
-  value       = aws_iam_role.lambda_execution_role.arn
+output "account_id" {
+  description = "Account ID sendo utilizada"
+  value       = data.aws_caller_identity.current.account_id
 }

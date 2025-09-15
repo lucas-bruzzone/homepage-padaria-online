@@ -1,28 +1,8 @@
 # ===================================
-# IAM ROLE PARA LAMBDA FUNCTIONS
+# DATA SOURCE PARA LAB ROLE (AWS ACADEMY)
 # ===================================
 
-resource "aws_iam_role" "lambda_execution_role" {
-  name = "${var.project_name}-lambda-execution-role-${var.environment}"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-  role       = aws_iam_role.lambda_execution_role.name
-}
+data "aws_caller_identity" "current" {}
 
 # ===================================
 # LAMBDA FUNCTION - PYTHON
@@ -37,7 +17,7 @@ data "archive_file" "python_lambda_zip" {
 resource "aws_lambda_function" "python_lambda" {
   filename      = data.archive_file.python_lambda_zip.output_path
   function_name = "${var.project_name}-python-lambda-${var.environment}"
-  role          = aws_iam_role.lambda_execution_role.arn
+  role          = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/LabRole"
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.11"
   timeout       = 30
@@ -65,7 +45,7 @@ data "archive_file" "nodejs_lambda_zip" {
 resource "aws_lambda_function" "nodejs_lambda" {
   filename      = data.archive_file.nodejs_lambda_zip.output_path
   function_name = "${var.project_name}-nodejs-lambda-${var.environment}"
-  role          = aws_iam_role.lambda_execution_role.arn
+  role          = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/LabRole"
   handler       = "index.handler"
   runtime       = "nodejs18.x"
   timeout       = 30
