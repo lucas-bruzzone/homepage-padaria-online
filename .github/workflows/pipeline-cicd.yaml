@@ -32,11 +32,11 @@ jobs:
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         aws-region: us-east-1
         
-    - name: Build Node.js Lambda
-      run: |
-        cd src/lambda/nodejs
-        npm install --production
-        cd ../../../
+    # - name: Build Node.js Lambda
+    #   run: |
+    #     cd src/lambda/nodejs
+    #     npm install --production
+    #     cd ../../../
         
     - name: Terraform Init
       working-directory: src/terraform

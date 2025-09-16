@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    # Substitua pelos outputs do bootstrap
+    # Substitua pelos seus valores
     bucket         = "padaria-online-terraform"
     key            = "padaria-online-terraform/terraform.tfstate"
     region         = "us-east-1"
