@@ -6,7 +6,6 @@ resource "aws_s3_bucket" "frontend" {
   bucket = "${var.project_name}-frontend-${var.environment}"
 }
 
-# Não precisa mais de configuração de website, pois será servido via Lambda
 resource "aws_s3_bucket_versioning" "frontend" {
   bucket = aws_s3_bucket.frontend.id
 
@@ -34,6 +33,3 @@ resource "aws_s3_bucket_public_access_block" "frontend" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
-
-# Como estamos usando LabRole, não podemos criar uma nova role
-# O Lambda vai usar LabRole que já tem permissões S3
