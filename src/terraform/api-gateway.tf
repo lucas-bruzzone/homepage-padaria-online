@@ -41,8 +41,52 @@ resource "aws_apigatewayv2_stage" "default" {
 }
 
 # ===================================
+# LAMBDA PARA SERVIR FRONTEND COM HTTPS
+# ===================================
+
+data "archive_file" "frontend_lambda_zip" {
+  type        = "zip"
+  source_dir  = "${path.module}/../lambda/frontend"
+  output_path = "${path.module}/frontend_lambda.zip"
+}
+
+resource "aws_lambda_function" "frontend_lambda" {
+  filename      = data.archive_file.frontend_lambda_zip.output_path
+  function_name = "${var.project_name}-frontend-${var.environment}"
+  role          = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/LabRole"
+  handler       = "index.handler"
+  runtime       = "nodejs18.x"
+  timeout       = 30
+
+  source_code_hash = data.archive_file.frontend_lambda_zip.output_base64sha256
+
+  environment {
+    variables = {
+      BUCKET_NAME = aws_s3_bucket.frontend.id
+    }
+  }
+}
+
+resource "aws_cloudwatch_log_group" "frontend_lambda_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.frontend_lambda.function_name}"
+  retention_in_days = 14
+}
+
+# ===================================
 # LAMBDA INTEGRATIONS
 # ===================================
+
+# Integração Frontend Lambda
+resource "aws_apigatewayv2_integration" "frontend_lambda" {
+  api_id           = aws_apigatewayv2_api.padaria_api.id
+  integration_type = "AWS_PROXY"
+
+  connection_type      = "INTERNET"
+  description          = "Frontend Lambda integration"
+  integration_method   = "POST"
+  integration_uri      = aws_lambda_function.frontend_lambda.invoke_arn
+  passthrough_behavior = "WHEN_NO_MATCH"
+}
 
 # Integração Python Lambda
 resource "aws_apigatewayv2_integration" "python_lambda" {
@@ -72,48 +116,69 @@ resource "aws_apigatewayv2_integration" "nodejs_lambda" {
 # ROUTES
 # ===================================
 
-# Rotas Python Lambda
+# Rotas para servir o frontend (HTTPS)
+resource "aws_apigatewayv2_route" "frontend_root" {
+  api_id    = aws_apigatewayv2_api.padaria_api.id
+  route_key = "GET /"
+  target    = "integrations/${aws_apigatewayv2_integration.frontend_lambda.id}"
+}
+
+resource "aws_apigatewayv2_route" "frontend_assets" {
+  api_id    = aws_apigatewayv2_api.padaria_api.id
+  route_key = "GET /{proxy+}"
+  target    = "integrations/${aws_apigatewayv2_integration.frontend_lambda.id}"
+}
+
+# Rotas API - Python Lambda
 resource "aws_apigatewayv2_route" "python_get" {
   api_id    = aws_apigatewayv2_api.padaria_api.id
-  route_key = "GET /python"
+  route_key = "GET /api/python"
   target    = "integrations/${aws_apigatewayv2_integration.python_lambda.id}"
 }
 
 resource "aws_apigatewayv2_route" "python_post" {
   api_id    = aws_apigatewayv2_api.padaria_api.id
-  route_key = "POST /python"
+  route_key = "POST /api/python"
   target    = "integrations/${aws_apigatewayv2_integration.python_lambda.id}"
 }
 
-# Rotas Node.js Lambda
+# Rotas API - Node.js Lambda
 resource "aws_apigatewayv2_route" "nodejs_get" {
   api_id    = aws_apigatewayv2_api.padaria_api.id
-  route_key = "GET /nodejs"
+  route_key = "GET /api/nodejs"
   target    = "integrations/${aws_apigatewayv2_integration.nodejs_lambda.id}"
 }
 
 resource "aws_apigatewayv2_route" "nodejs_post" {
   api_id    = aws_apigatewayv2_api.padaria_api.id
-  route_key = "POST /nodejs"
+  route_key = "POST /api/nodejs"
   target    = "integrations/${aws_apigatewayv2_integration.nodejs_lambda.id}"
 }
 
 # Rotas específicas do sistema da padaria
 resource "aws_apigatewayv2_route" "produtos_get" {
   api_id    = aws_apigatewayv2_api.padaria_api.id
-  route_key = "GET /produtos"
+  route_key = "GET /api/produtos"
   target    = "integrations/${aws_apigatewayv2_integration.python_lambda.id}"
 }
 
 resource "aws_apigatewayv2_route" "pedidos_post" {
   api_id    = aws_apigatewayv2_api.padaria_api.id
-  route_key = "POST /pedidos"
+  route_key = "POST /api/pedidos"
   target    = "integrations/${aws_apigatewayv2_integration.nodejs_lambda.id}"
 }
 
 # ===================================
 # LAMBDA PERMISSIONS
 # ===================================
+
+resource "aws_lambda_permission" "frontend_lambda_permission" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.frontend_lambda.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.padaria_api.execution_arn}/*/*"
+}
 
 resource "aws_lambda_permission" "python_lambda_permission" {
   statement_id  = "AllowExecutionFromAPIGateway"

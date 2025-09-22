@@ -32,9 +32,15 @@ jobs:
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         aws-region: us-east-1
         
-    - name: Build Node.js Lambda
+    - name: Build Node.js Lambdas
       run: |
+        # Build backend Node.js Lambda
         cd src/lambda/nodejs
+        npm install --production
+        cd ../../../
+        
+        # Build frontend Node.js Lambda
+        cd src/lambda/frontend
         npm install --production
         cd ../../../
         
@@ -61,3 +67,11 @@ jobs:
         BUCKET_NAME="homepage-padaria-online-frontend-development"
         aws s3 sync src/frontend/ s3://$BUCKET_NAME --delete
         echo "Frontend synced to bucket: $BUCKET_NAME"
+        
+    - name: Get API Gateway URL
+      if: github.event_name == 'push'
+      working-directory: src/terraform
+      run: |
+        API_URL=$(terraform output -raw api_gateway_url)
+        echo "🚀 Site disponível com HTTPS em: $API_URL"
+        echo "API_GATEWAY_URL=$API_URL" >> $GITHUB_ENV
