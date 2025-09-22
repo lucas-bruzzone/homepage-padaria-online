@@ -3,71 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Padaria Online - Deploy Test</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .status {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-            border: 1px solid #c3e6cb;
-        }
-        .info {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-            text-align: left;
-        }
-        h1 { color: #333; }
-        .timestamp { 
-            color: #666; 
-            font-size: 0.9em; 
-            margin-top: 20px;
-        }
-    </style>
+    <title>Padaria Online</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>🥖 Padaria Online</h1>
-        
-        <div class="status">
-            ✅ Deploy realizado com sucesso!
-        </div>
-
-        <div class="info">
-            <h3>Informações do Deploy:</h3>
-            <ul>
-                <li><strong>Projeto:</strong> homepage-padaria-online</li>
-                <li><strong>Ambiente:</strong> development</li>
-                <li><strong>Região AWS:</strong> us-east-1</li>
-                <li><strong>Infraestrutura:</strong> S3 + Terraform</li>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">
+                <h2>🥖 Padaria Online</h2>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Início</a></li>
+                <li><a href="sobre.html">Sobre</a></li>
+                <li><a href="#produtos">Produtos</a></li>
+                <li><a href="#contato">Contato</a></li>
             </ul>
-        </div>
+        </nav>
+    </header>
 
-        <p>Este é um arquivo de validação para testar o hosting estático no S3.</p>
-        <p>O site da padaria será implementado em breve com as funcionalidades definidas nos requisitos.</p>
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h1>Bem-vindo à nossa Padaria</h1>
+                <p>Os melhores pães e doces artesanais da região</p>
+                <button class="btn-primary">Ver Produtos</button>
+            </div>
+        </section>
 
-        <div class="timestamp">
-            <script>
-                document.write('Deploy validado em: ' + new Date().toLocaleString('pt-BR'));
-            </script>
+        <!-- Produtos Section -->
+        <section id="produtos" class="produtos">
+            <div class="container">
+                <h2>Nossos Produtos</h2>
+                <div class="produtos-grid">
+                    <div class="produto-card">
+                        <h3>Pães</h3>
+                        <p>Pão francês, integral, doce e muito mais</p>
+                    </div>
+                    <div class="produto-card">
+                        <h3>Doces</h3>
+                        <p>Bolos, tortas, brigadeiros e sobremesas</p>
+                    </div>
+                    <div class="produto-card">
+                        <h3>Salgados</h3>
+                        <p>Coxinhas, empadas, esfirras e lanches</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contato Section -->
+        <section id="contato" class="contato">
+            <div class="container">
+                <h2>Entre em Contato</h2>
+                <div class="contato-info">
+                    <p><strong>Telefone:</strong> (11) 9999-9999</p>
+                    <p><strong>Endereço:</strong> Rua das Padarias, 123</p>
+                    <p><strong>Horário:</strong> Seg-Dom: 6h às 20h</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Padaria Online. Todos os direitos reservados.</p>
         </div>
-    </div>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
