@@ -150,7 +150,7 @@ resource "aws_apigatewayv2_route" "nodejs_get" {
 }
 
 resource "aws_apigatewayv2_route" "nodejs_post" {
-  api_id    = aws_apigatewayv2_api.id
+  api_id    = aws_apigatewayv2_api.padaria_api.id
   route_key = "POST /api/nodejs"
   target    = "integrations/${aws_apigatewayv2_integration.nodejs_lambda.id}"
 }
