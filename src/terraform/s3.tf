@@ -81,29 +81,3 @@ resource "aws_s3_object" "script_js" {
 
   depends_on = [aws_s3_bucket.frontend]
 }
-
-# ===================================
-# POLÍTICA IAM PARA LAMBDA ACESSAR S3
-# ===================================
-
-resource "aws_iam_role_policy" "lambda_s3_access" {
-  name = "${var.project_name}-lambda-s3-access-${var.environment}"
-  role = "LabRole"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "s3:GetObject",
-          "s3:ListBucket"
-        ]
-        Resource = [
-          aws_s3_bucket.frontend.arn,
-          "${aws_s3_bucket.frontend.arn}/*"
-        ]
-      }
-    ]
-  })
-}
