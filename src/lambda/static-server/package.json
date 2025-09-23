@@ -1,0 +1,11 @@
+{
+  "name": "static-server-lambda",
+  "version": "1.0.0",
+  "description": "Lambda function to serve static files from S3 with HTTPS",
+  "main": "index.js",
+  "dependencies": {
+    "aws-sdk": "^2.1000.0"
+  },
+  "author": "Padaria Online Team",
+  "license": "MIT"
+}
