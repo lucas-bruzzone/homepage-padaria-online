@@ -1,20 +1,16 @@
 # ===================================
-# API GATEWAY OUTPUTS
-# ===================================
-
-output "api_gateway_url" {
-  description = "URL do API Gateway (HTTPS)"
-  value       = aws_apigatewayv2_api.padaria_api.api_endpoint
-}
-
-output "website_url" {
-  description = "URL do website (via API Gateway HTTPS)"
-  value       = aws_apigatewayv2_api.padaria_api.api_endpoint
-}
-
-# ===================================
 # S3 OUTPUTS
 # ===================================
+
+output "website_endpoint" {
+  description = "Website endpoint URL"
+  value       = aws_s3_bucket_website_configuration.frontend.website_endpoint
+}
+
+output "website_domain" {
+  description = "Website domain"
+  value       = aws_s3_bucket_website_configuration.frontend.website_domain
+}
 
 output "bucket_name" {
   description = "Nome do bucket S3"
@@ -29,16 +25,6 @@ output "bucket_arn" {
 # ===================================
 # LAMBDA OUTPUTS
 # ===================================
-
-output "frontend_lambda_function_name" {
-  description = "Nome da função Lambda Frontend"
-  value       = aws_lambda_function.frontend_lambda.function_name
-}
-
-output "frontend_lambda_arn" {
-  description = "ARN da função Lambda Frontend"
-  value       = aws_lambda_function.frontend_lambda.arn
-}
 
 output "python_lambda_function_name" {
   description = "Nome da função Lambda Python"
@@ -60,36 +46,7 @@ output "nodejs_lambda_arn" {
   value       = aws_lambda_function.nodejs_lambda.arn
 }
 
-# ===================================
-# API GATEWAY DETAILS
-# ===================================
-
-output "api_gateway_id" {
-  description = "ID do API Gateway"
-  value       = aws_apigatewayv2_api.padaria_api.id
-}
-
-output "api_gateway_name" {
-  description = "Nome do API Gateway"
-  value       = aws_apigatewayv2_api.padaria_api.name
-}
-
 output "account_id" {
   description = "Account ID sendo utilizada"
   value       = data.aws_caller_identity.current.account_id
-}
-
-# ===================================
-# ENDPOINTS DA API
-# ===================================
-
-output "api_endpoints" {
-  description = "Endpoints disponíveis da API"
-  value = {
-    frontend   = "${aws_apigatewayv2_api.padaria_api.api_endpoint}/"
-    python_api = "${aws_apigatewayv2_api.padaria_api.api_endpoint}/api/python"
-    nodejs_api = "${aws_apigatewayv2_api.padaria_api.api_endpoint}/api/nodejs"
-    produtos   = "${aws_apigatewayv2_api.padaria_api.api_endpoint}/api/produtos"
-    pedidos    = "${aws_apigatewayv2_api.padaria_api.api_endpoint}/api/pedidos"
-  }
 }
