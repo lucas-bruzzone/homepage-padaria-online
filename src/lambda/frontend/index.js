@@ -7,13 +7,18 @@ exports.handler = async (event) => {
     const bucketName = process.env.BUCKET_NAME;
     let path = event.rawPath || '/';
     
+    console.log('Original path:', path);
+    
     // Se for root, serve index.html
     if (path === '/') {
         path = '/index.html';
     }
     
-    // Remove leading slash
+    // Remove leading slash para o S3 key
     const key = path.startsWith('/') ? path.substring(1) : path;
+    
+    console.log('S3 Key:', key);
+    console.log('Bucket:', bucketName);
     
     try {
         // Busca o arquivo no S3
@@ -22,63 +27,124 @@ exports.handler = async (event) => {
             Key: key
         };
         
+        console.log('Fetching from S3:', params);
         const data = await s3.getObject(params).promise();
         
-        // Determina o content type baseado na extensão
+        // Função melhorada para determinar content type
         const getContentType = (filename) => {
             const ext = filename.toLowerCase().split('.').pop();
             const types = {
-                'html': 'text/html',
-                'css': 'text/css',
-                'js': 'application/javascript',
-                'json': 'application/json',
+                'html': 'text/html; charset=utf-8',
+                'htm': 'text/html; charset=utf-8',
+                'css': 'text/css; charset=utf-8',
+                'js': 'application/javascript; charset=utf-8',
+                'mjs': 'application/javascript; charset=utf-8',
+                'json': 'application/json; charset=utf-8',
+                'xml': 'application/xml; charset=utf-8',
+                'txt': 'text/plain; charset=utf-8',
+                
+                // Imagens
                 'png': 'image/png',
                 'jpg': 'image/jpeg',
                 'jpeg': 'image/jpeg',
                 'gif': 'image/gif',
+                'webp': 'image/webp',
                 'svg': 'image/svg+xml',
                 'ico': 'image/x-icon',
+                'bmp': 'image/bmp',
+                
+                // Fontes
                 'woff': 'font/woff',
                 'woff2': 'font/woff2',
                 'ttf': 'font/ttf',
-                'eot': 'application/vnd.ms-fontobject'
+                'otf': 'font/otf',
+                'eot': 'application/vnd.ms-fontobject',
+                
+                // Outros
+                'pdf': 'application/pdf',
+                'zip': 'application/zip',
+                'mp4': 'video/mp4',
+                'mp3': 'audio/mpeg'
             };
-            return types[ext] || 'text/plain';
+            
+            const contentType = types[ext] || 'application/octet-stream';
+            console.log(`File: ${filename}, Extension: ${ext}, Content-Type: ${contentType}`);
+            return contentType;
         };
         
         const contentType = getContentType(key);
-        const isBase64 = contentType.startsWith('image/') || contentType.startsWith('font/');
         
-        return {
-            statusCode: 200,
-            headers: {
-                'Content-Type': contentType,
-                'Cache-Control': contentType.startsWith('text/html') ? 'no-cache' : 'max-age=31536000'
-            },
-            body: isBase64 ? data.Body.toString('base64') : data.Body.toString(),
-            isBase64Encoded: isBase64
+        // Determina se precisa de base64 encoding
+        const needsBase64 = 
+            contentType.startsWith('image/') || 
+            contentType.startsWith('font/') ||
+            contentType.startsWith('video/') ||
+            contentType.startsWith('audio/') ||
+            contentType === 'application/pdf' ||
+            contentType === 'application/zip' ||
+            contentType === 'application/octet-stream';
+        
+        console.log('Content-Type:', contentType);
+        console.log('Needs Base64:', needsBase64);
+        
+        // Headers otimizados
+        const headers = {
+            'Content-Type': contentType,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
         };
         
+        // Cache strategy
+        if (contentType.startsWith('text/html')) {
+            headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+            headers['Pragma'] = 'no-cache';
+            headers['Expires'] = '0';
+        } else {
+            // Cache assets por 1 ano
+            headers['Cache-Control'] = 'public, max-age=31536000, immutable';
+        }
+        
+        const response = {
+            statusCode: 200,
+            headers: headers,
+            body: needsBase64 ? data.Body.toString('base64') : data.Body.toString('utf-8'),
+            isBase64Encoded: needsBase64
+        };
+        
+        console.log('Success - Response headers:', response.headers);
+        console.log('Body length:', response.body.length);
+        
+        return response;
+        
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error details:', {
+            code: error.code,
+            message: error.message,
+            key: key,
+            bucket: bucketName
+        });
         
         // Se não encontrar o arquivo e não for uma API route, serve index.html (SPA fallback)
         if (error.code === 'NoSuchKey' && !path.startsWith('/api/')) {
+            console.log('File not found, trying fallback to index.html');
             try {
                 const indexParams = {
                     Bucket: bucketName,
                     Key: 'index.html'
                 };
                 
+                console.log('Fetching fallback:', indexParams);
                 const indexData = await s3.getObject(indexParams).promise();
                 
                 return {
                     statusCode: 200,
                     headers: {
-                        'Content-Type': 'text/html',
-                        'Cache-Control': 'no-cache'
+                        'Content-Type': 'text/html; charset=utf-8',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Access-Control-Allow-Origin': '*'
                     },
-                    body: indexData.Body.toString()
+                    body: indexData.Body.toString('utf-8')
                 };
                 
             } catch (indexError) {
@@ -89,12 +155,17 @@ exports.handler = async (event) => {
         return {
             statusCode: 404,
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json; charset=utf-8',
+                'Access-Control-Allow-Origin': '*'
             },
             body: JSON.stringify({
-                message: 'File not found',
-                path: path
-            })
+                error: 'File not found',
+                path: path,
+                key: key,
+                bucket: bucketName,
+                message: error.message,
+                timestamp: new Date().toISOString()
+            }, null, 2)
         };
     }
 };
