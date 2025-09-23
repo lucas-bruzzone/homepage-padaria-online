@@ -61,13 +61,6 @@ jobs:
       working-directory: src/terraform
       run: terraform apply -var-file=tfvars/development.tfvars -auto-approve
 
-    - name: Sync Frontend to S3
-      if: github.event_name == 'push'
-      run: |
-        BUCKET_NAME="homepage-padaria-online-frontend-development"
-        aws s3 sync src/frontend/ s3://$BUCKET_NAME --delete
-        echo "Frontend synced to bucket: $BUCKET_NAME"
-        
     - name: Get API Gateway URL
       if: github.event_name == 'push'
       working-directory: src/terraform
@@ -75,3 +68,11 @@ jobs:
         API_URL=$(terraform output -raw api_gateway_url)
         echo "🚀 Site disponível com HTTPS em: $API_URL"
         echo "API_GATEWAY_URL=$API_URL" >> $GITHUB_ENV
+        
+    - name: Display Deployment Info
+      if: github.event_name == 'push'
+      working-directory: src/terraform
+      run: |
+        echo "🎉 Deploy concluído com sucesso!"
+        echo "📋 Endpoints disponíveis:"
+        terraform output -json api_endpoints | jq -r 'to_entries[] | "  \(.key): \(.value)"'
