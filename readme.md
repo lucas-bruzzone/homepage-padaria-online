@@ -29,3 +29,6 @@
 - **Adequação:** Formulário para encomendas com validação completa
 - **Conformidade:** Segurança de dados, integração com backend
 - **Satisfação:** Processo simplificado de pedidos
+
+
+aws s3 cp s3://padaria-online-terraform/padaria-online-terraform/terraform.tfstate ./
