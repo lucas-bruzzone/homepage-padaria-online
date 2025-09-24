@@ -58,7 +58,7 @@ resource "aws_db_instance" "padaria_postgres" {
   instance_class = "db.t3.micro"
 
   db_name  = "padariadb"
-  username = "admin"
+  username = "padaria_admin "
   password = random_password.db_password.result
 
   allocated_storage = 20
