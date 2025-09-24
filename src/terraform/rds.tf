@@ -54,7 +54,7 @@ resource "aws_db_instance" "padaria_postgres" {
   identifier = "${var.project_name}-postgres-${var.environment}"
 
   engine         = "postgres"
-  engine_version = "15.4"
+  engine_version = "17.4"
   instance_class = "db.t3.micro"
 
   db_name  = "padariadb"
