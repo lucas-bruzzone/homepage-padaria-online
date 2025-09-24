@@ -5,14 +5,30 @@
 data "aws_caller_identity" "current" {}
 
 # ===================================
-# LAMBDA FUNCTION - PYTHON
-# ===================================
+resource "aws_security_group" "lambda_sg" {
+  name_prefix = "${var.project_name}-lambda-${var.environment}"
+  description = "Security group for Lambda functions"
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-lambda-sg-${var.environment}"
+  }
+}
 
 data "archive_file" "python_lambda_zip" {
   type        = "zip"
   source_dir  = "${path.module}/../lambda/python"
   output_path = "${path.module}/python_lambda.zip"
 }
+# ===================================
+# LAMBDA PYTHON COM RDS
+# ===================================
 
 resource "aws_lambda_function" "python_lambda" {
   filename      = data.archive_file.python_lambda_zip.output_path
@@ -24,23 +40,30 @@ resource "aws_lambda_function" "python_lambda" {
 
   source_code_hash = data.archive_file.python_lambda_zip.output_base64sha256
 
+  # VPC Configuration
+  vpc_config {
+    subnet_ids         = data.aws_subnets.default.ids
+    security_group_ids = [aws_security_group.lambda_sg.id]
+  }
+
   environment {
     variables = {
       ENVIRONMENT  = var.environment
       PROJECT_NAME = var.project_name
+      DB_HOST      = aws_db_instance.padaria_postgres.endpoint
+      DB_PORT      = tostring(aws_db_instance.padaria_postgres.port)
+      DB_NAME      = aws_db_instance.padaria_postgres.db_name
+      DB_USERNAME  = aws_db_instance.padaria_postgres.username
+      DB_PASSWORD  = random_password.db_password.result
     }
   }
+
+  depends_on = [aws_db_instance.padaria_postgres]
 }
 
 # ===================================
-# LAMBDA FUNCTION - NODE.JS
+# LAMBDA NODE.JS COM RDS
 # ===================================
-
-data "archive_file" "nodejs_lambda_zip" {
-  type        = "zip"
-  source_dir  = "${path.module}/../lambda/nodejs"
-  output_path = "${path.module}/nodejs_lambda.zip"
-}
 
 resource "aws_lambda_function" "nodejs_lambda" {
   filename      = data.archive_file.nodejs_lambda_zip.output_path
@@ -52,12 +75,25 @@ resource "aws_lambda_function" "nodejs_lambda" {
 
   source_code_hash = data.archive_file.nodejs_lambda_zip.output_base64sha256
 
+  # VPC Configuration
+  vpc_config {
+    subnet_ids         = data.aws_subnets.default.ids
+    security_group_ids = [aws_security_group.lambda_sg.id]
+  }
+
   environment {
     variables = {
       ENVIRONMENT  = var.environment
       PROJECT_NAME = var.project_name
+      DB_HOST      = aws_db_instance.padaria_postgres.endpoint
+      DB_PORT      = tostring(aws_db_instance.padaria_postgres.port)
+      DB_NAME      = aws_db_instance.padaria_postgres.db_name
+      DB_USERNAME  = aws_db_instance.padaria_postgres.username
+      DB_PASSWORD  = random_password.db_password.result
     }
   }
+
+  depends_on = [aws_db_instance.padaria_postgres]
 }
 
 # ===================================
