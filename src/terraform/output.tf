@@ -99,3 +99,30 @@ output "deployment_info" {
     bucket_name  = aws_s3_bucket.frontend.id
   }
 }
+
+
+output "rds_endpoint" {
+  description = "RDS instance endpoint"
+  value       = aws_db_instance.padaria_postgres.endpoint
+}
+
+output "rds_port" {
+  description = "RDS instance port"
+  value       = aws_db_instance.padaria_postgres.port
+}
+
+output "database_name" {
+  description = "Database name"
+  value       = aws_db_instance.padaria_postgres.db_name
+}
+
+output "database_username" {
+  description = "Database username"
+  value       = aws_db_instance.padaria_postgres.username
+}
+
+output "database_password" {
+  description = "Database password (generated)"
+  value       = random_password.db_password.result
+  sensitive   = true
+}
