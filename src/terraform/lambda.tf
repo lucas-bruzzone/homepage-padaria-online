@@ -1,10 +1,21 @@
-# ===================================
-# DATA SOURCE PARA LAB ROLE (AWS ACADEMY)
-# ===================================
-
 data "aws_caller_identity" "current" {}
 
+data "archive_file" "python_lambda_zip" {
+  type        = "zip"
+  source_dir  = "${path.module}/../lambda/python"
+  output_path = "${path.module}/python_lambda.zip"
+}
+
+data "archive_file" "nodejs_lambda_zip" {
+  type        = "zip"
+  source_dir  = "${path.module}/../lambda/nodejs"
+  output_path = "${path.module}/nodejs_lambda.zip"
+}
+
 # ===================================
+# SECURITY GROUP PARA LAMBDAS
+# ===================================
+
 resource "aws_security_group" "lambda_sg" {
   name_prefix = "${var.project_name}-lambda-${var.environment}"
   description = "Security group for Lambda functions"
@@ -21,13 +32,8 @@ resource "aws_security_group" "lambda_sg" {
   }
 }
 
-data "archive_file" "python_lambda_zip" {
-  type        = "zip"
-  source_dir  = "${path.module}/../lambda/python"
-  output_path = "${path.module}/python_lambda.zip"
-}
 # ===================================
-# LAMBDA PYTHON COM RDS
+# LAMBDA FUNCTION - PYTHON (COM RDS E VPC)
 # ===================================
 
 resource "aws_lambda_function" "python_lambda" {
@@ -40,7 +46,6 @@ resource "aws_lambda_function" "python_lambda" {
 
   source_code_hash = data.archive_file.python_lambda_zip.output_base64sha256
 
-  # VPC Configuration
   vpc_config {
     subnet_ids         = data.aws_subnets.default.ids
     security_group_ids = [aws_security_group.lambda_sg.id]
@@ -62,7 +67,7 @@ resource "aws_lambda_function" "python_lambda" {
 }
 
 # ===================================
-# LAMBDA NODE.JS COM RDS
+# LAMBDA FUNCTION - NODE.JS (COM RDS E VPC)
 # ===================================
 
 resource "aws_lambda_function" "nodejs_lambda" {
@@ -75,7 +80,6 @@ resource "aws_lambda_function" "nodejs_lambda" {
 
   source_code_hash = data.archive_file.nodejs_lambda_zip.output_base64sha256
 
-  # VPC Configuration
   vpc_config {
     subnet_ids         = data.aws_subnets.default.ids
     security_group_ids = [aws_security_group.lambda_sg.id]
@@ -95,10 +99,6 @@ resource "aws_lambda_function" "nodejs_lambda" {
 
   depends_on = [aws_db_instance.padaria_postgres]
 }
-
-# ===================================
-# CLOUDWATCH LOG GROUPS
-# ===================================
 
 resource "aws_cloudwatch_log_group" "python_lambda_logs" {
   name              = "/aws/lambda/${aws_lambda_function.python_lambda.function_name}"
