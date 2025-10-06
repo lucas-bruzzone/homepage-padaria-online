@@ -49,7 +49,7 @@ resource "random_password" "db_password" {
   special = true
 }
 
-# Instância RDS PostgreSQL
+# Instância RDS PostgreSQL (OTIMIZADO)
 resource "aws_db_instance" "padaria_postgres" {
   identifier = "${var.project_name}-postgres-${var.environment}"
 
@@ -61,13 +61,15 @@ resource "aws_db_instance" "padaria_postgres" {
   username = "postgres"
   password = random_password.db_password.result
 
-  allocated_storage = 20
+  # OTIMIZADO: Reduzido de 20GB para 10GB (mínimo PostgreSQL)
+  allocated_storage = 10
   storage_type      = "gp2"
 
   db_subnet_group_name   = aws_db_subnet_group.padaria_db_subnet_group.name
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   publicly_accessible    = true
 
+  # OTIMIZADO: Sem backup e Multi-AZ desabilitado
   backup_retention_period = 0
   skip_final_snapshot     = true
   deletion_protection     = false
