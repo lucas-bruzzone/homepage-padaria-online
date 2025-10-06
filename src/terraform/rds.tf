@@ -61,8 +61,8 @@ resource "aws_db_instance" "padaria_postgres" {
   username = "postgres"
   password = random_password.db_password.result
 
-  # OTIMIZADO: Reduzido de 20GB para 10GB (mínimo PostgreSQL)
-  allocated_storage = 10
+  # Mínimo para PostgreSQL com gp2 é 20GB
+  allocated_storage = 20
   storage_type      = "gp2"
 
   db_subnet_group_name   = aws_db_subnet_group.padaria_db_subnet_group.name
