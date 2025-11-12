@@ -47,15 +47,6 @@ src/lambda/layers/psycopg2/
 - Biblioteca compilada não fica no Git
 - Compatível com runtime Lambda automaticamente
 
-## Deploy
-
-```bash
-cd src/terraform
-terraform init
-terraform plan -var-file=tfvars/development.tfvars
-terraform apply -var-file=tfvars/development.tfvars -auto-approve
-```
-
 ## Testando
 
 ```bash
@@ -72,14 +63,3 @@ curl https://[API_URL]/python
   "environment": "development"
 }
 ```
-
-## Adicionando Novas Bibliotecas
-
-Edite `src/lambda/layers/psycopg2/requirements.txt`:
-```txt
-psycopg2-binary==2.9.9
-requests==2.31.0
-boto3==1.34.0
-```
-
-Execute `terraform apply` - o módulo rebuilda automaticamente.
