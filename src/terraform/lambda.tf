@@ -1,15 +1,30 @@
 data "aws_caller_identity" "current" {}
 
-data "archive_file" "python_lambda_zip" {
-  type        = "zip"
-  source_dir  = "${path.module}/../lambda/python"
-  output_path = "${path.module}/python_lambda.zip"
-}
+# ===================================
+# LAMBDA LAYER - PSYCOPG2
+# ===================================
 
-data "archive_file" "nodejs_lambda_zip" {
-  type        = "zip"
-  source_dir  = "${path.module}/../lambda/nodejs"
-  output_path = "${path.module}/nodejs_lambda.zip"
+module "psycopg2_layer" {
+  source  = "terraform-aws-modules/lambda/aws"
+  version = "~> 4.7"
+
+  create_function = false
+  create_layer    = true
+
+  layer_name          = "${var.project_name}-psycopg2-${var.environment}"
+  description         = "psycopg2 library for PostgreSQL connection"
+  compatible_runtimes = ["python3.11"]
+  runtime             = "python3.11"
+
+  source_path = [
+    {
+      path             = "${path.module}/../lambda/layers/psycopg2"
+      pip_requirements = true
+      prefix_in_zip    = "python"
+    }
+  ]
+
+  store_on_s3 = false
 }
 
 # ===================================
@@ -33,42 +48,55 @@ resource "aws_security_group" "lambda_sg" {
 }
 
 # ===================================
-# LAMBDA FUNCTION - PYTHON (COM RDS E VPC)
+# LAMBDA FUNCTION - PYTHON (COM PSYCOPG2 LAYER)
 # ===================================
 
-resource "aws_lambda_function" "python_lambda" {
-  filename      = data.archive_file.python_lambda_zip.output_path
+module "python_lambda" {
+  source  = "terraform-aws-modules/lambda/aws"
+  version = "~> 4.7"
+
   function_name = "${var.project_name}-python-lambda-${var.environment}"
-  role          = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/LabRole"
+  source_path   = "${path.module}/../lambda/python"
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.11"
   timeout       = 30
 
-  source_code_hash = data.archive_file.python_lambda_zip.output_base64sha256
+  layers = [module.psycopg2_layer.lambda_layer_arn]
 
-  vpc_config {
-    subnet_ids         = data.aws_subnets.default.ids
-    security_group_ids = [aws_security_group.lambda_sg.id]
+  vpc_subnet_ids         = data.aws_subnets.default.ids
+  vpc_security_group_ids = [aws_security_group.lambda_sg.id]
+  attach_network_policy  = true
+
+  environment_variables = {
+    ENVIRONMENT  = var.environment
+    PROJECT_NAME = var.project_name
+    DB_HOST      = aws_db_instance.padaria_postgres.endpoint
+    DB_PORT      = tostring(aws_db_instance.padaria_postgres.port)
+    DB_NAME      = aws_db_instance.padaria_postgres.db_name
+    DB_USERNAME  = aws_db_instance.padaria_postgres.username
+    DB_PASSWORD  = random_password.db_password.result
   }
 
-  environment {
-    variables = {
-      ENVIRONMENT  = var.environment
-      PROJECT_NAME = var.project_name
-      DB_HOST      = aws_db_instance.padaria_postgres.endpoint
-      DB_PORT      = tostring(aws_db_instance.padaria_postgres.port)
-      DB_NAME      = aws_db_instance.padaria_postgres.db_name
-      DB_USERNAME  = aws_db_instance.padaria_postgres.username
-      DB_PASSWORD  = random_password.db_password.result
-    }
-  }
+  create_role = false
+  lambda_role = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/LabRole"
 
-  depends_on = [aws_db_instance.padaria_postgres]
+  store_on_s3 = false
+
+  depends_on = [
+    aws_db_instance.padaria_postgres,
+    module.psycopg2_layer
+  ]
 }
 
 # ===================================
-# LAMBDA FUNCTION - NODE.JS (COM RDS E VPC)
+# LAMBDA FUNCTION - NODE.JS
 # ===================================
+
+data "archive_file" "nodejs_lambda_zip" {
+  type        = "zip"
+  source_dir  = "${path.module}/../lambda/nodejs"
+  output_path = "${path.module}/nodejs_lambda.zip"
+}
 
 resource "aws_lambda_function" "nodejs_lambda" {
   filename      = data.archive_file.nodejs_lambda_zip.output_path
@@ -100,8 +128,12 @@ resource "aws_lambda_function" "nodejs_lambda" {
   depends_on = [aws_db_instance.padaria_postgres]
 }
 
+# ===================================
+# CLOUDWATCH LOGS
+# ===================================
+
 resource "aws_cloudwatch_log_group" "python_lambda_logs" {
-  name              = "/aws/lambda/${aws_lambda_function.python_lambda.function_name}"
+  name              = "/aws/lambda/${module.python_lambda.lambda_function_name}"
   retention_in_days = 14
 }
 

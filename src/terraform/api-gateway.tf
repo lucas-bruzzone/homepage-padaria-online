@@ -52,7 +52,7 @@ resource "aws_apigatewayv2_integration" "python_lambda" {
   connection_type      = "INTERNET"
   description          = "Python Lambda integration"
   integration_method   = "POST"
-  integration_uri      = aws_lambda_function.python_lambda.invoke_arn
+  integration_uri      = module.python_lambda.lambda_function_invoke_arn
   passthrough_behavior = "WHEN_NO_MATCH"
 }
 
@@ -118,7 +118,7 @@ resource "aws_apigatewayv2_route" "pedidos_post" {
 resource "aws_lambda_permission" "python_lambda_permission" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.python_lambda.function_name
+  function_name = module.python_lambda.lambda_function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.padaria_api.execution_arn}/*/*"
 }

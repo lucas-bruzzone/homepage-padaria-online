@@ -24,6 +24,11 @@ jobs:
       with:
         node-version: '18'
         
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -66,34 +71,32 @@ jobs:
       run: |
         BUCKET_NAME="homepage-padaria-online-frontend-development"
         aws s3 sync src/frontend/ s3://$BUCKET_NAME --delete
-        echo "✅ Frontend synced to bucket: $BUCKET_NAME"
+        echo "Frontend synced to bucket: $BUCKET_NAME"
         
     - name: Get Website URLs
       if: github.event_name == 'push'
       working-directory: src/terraform
       run: |
-        echo "🌐 Website URLs:"
+        echo "Website URLs:"
         echo "HTTP:  $(terraform output -raw website_endpoint)"
         echo "HTTPS: $(terraform output -raw https_website_url)"
         echo ""
-        echo "🔒 Use a URL HTTPS para produção!"
+        echo "Use a URL HTTPS para producao!"
         
     - name: Test HTTPS Endpoint
       if: github.event_name == 'push'
       working-directory: src/terraform
       run: |
         HTTPS_URL=$(terraform output -raw https_website_url)
-        echo "🧪 Testando endpoint HTTPS: $HTTPS_URL"
+        echo "Testando endpoint HTTPS: $HTTPS_URL"
         
-        # Aguarda alguns segundos para o deploy completar
         sleep 10
         
-        # Testa se o endpoint responde
         HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$HTTPS_URL" || echo "000")
         
         if [ "$HTTP_STATUS" = "200" ]; then
-          echo "✅ Website HTTPS está funcionando! Status: $HTTP_STATUS"
+          echo "Website HTTPS esta funcionando! Status: $HTTP_STATUS"
         else
-          echo "⚠️ Website pode estar ainda deployando. Status: $HTTP_STATUS"
+          echo "Website pode estar ainda deployando. Status: $HTTP_STATUS"
           echo "Aguarde alguns minutos e teste manualmente."
         fi
