@@ -132,10 +132,7 @@ resource "aws_lambda_function" "nodejs_lambda" {
 # CLOUDWATCH LOGS
 # ===================================
 
-resource "aws_cloudwatch_log_group" "python_lambda_logs" {
-  name              = "/aws/lambda/${module.python_lambda.lambda_function_name}"
-  retention_in_days = 14
-}
+# Log group do Python Lambda é criado automaticamente pelo módulo
 
 resource "aws_cloudwatch_log_group" "nodejs_lambda_logs" {
   name              = "/aws/lambda/${aws_lambda_function.nodejs_lambda.function_name}"
